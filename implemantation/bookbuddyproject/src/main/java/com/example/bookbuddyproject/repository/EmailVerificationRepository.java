@@ -20,8 +20,7 @@ public class EmailVerificationRepository {
 
     public Optional<EmailVerification> findByEmail(String email) {
         List<EmailVerification> result = em.createQuery(
-                "select e from EmailVerification e where e.email = :email order by e.id desc", 
-                EmailVerification.class)
+                "select e from EmailVerification e where e.email = :email order by e.id desc", EmailVerification.class)
                 .setParameter("email", email)
                 .setMaxResults(1)
                 .getResultList();

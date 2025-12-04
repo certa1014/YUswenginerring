@@ -27,6 +27,7 @@ public class AdminMemberController {
      * URL: GET /admin/members
      */
     @GetMapping("/members")
+    // 수정 name  추가
     public String memberList(@RequestParam(name = "keyword", required = false) String keyword, HttpSession session, Model model) {
         if (!isAdminLoggedIn(session)) {
             return "redirect:/admin/login";
@@ -46,7 +47,7 @@ public class AdminMemberController {
      * URL: POST /admin/members/{id}/ban
      */
     @PostMapping("/members/{id}/ban")
-    // @PathVariable(name = "id") 처럼 name을 명시해야 함
+    // 수정 name 추가
     public String banMember(@PathVariable(name = "id") Long memberId, HttpSession session) {
         if (!isAdminLoggedIn(session)) {
             return "redirect:/admin/login";

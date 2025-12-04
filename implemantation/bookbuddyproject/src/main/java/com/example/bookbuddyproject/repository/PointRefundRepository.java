@@ -38,8 +38,7 @@ public class PointRefundRepository {
     public List<PointRefundRequest> findByMember(Long memberId) {
         return em.createQuery(
                         "select r from PointRefundRequest r " +
-                                "where r.member.id = :memberId order by r.requestedAt desc",
-                        PointRefundRequest.class)
+                                "where r.member.id = :memberId order by r.requestedAt desc", PointRefundRequest.class)
                 .setParameter("memberId", memberId)
                 .getResultList();
     }

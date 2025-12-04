@@ -112,7 +112,7 @@ public class PointController {
                          BindingResult bindingResult,
                          HttpSession session,
                          Model model) {
-        Member loginMember = getLoginMember(session); // ⭐ 변경
+        Member loginMember = getLoginMember(session); 
         if (loginMember == null) {
             return "redirect:/login";
         }

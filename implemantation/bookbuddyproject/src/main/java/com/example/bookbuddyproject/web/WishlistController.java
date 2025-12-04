@@ -20,10 +20,10 @@ public class WishlistController {
 
     /**
      * 찜하기 토글
-     * Use Case #3.1
      */
     @PostMapping("/toggle")
-    public String toggle(@RequestParam Long bookId, HttpSession session) {
+    // 수정 name 추가
+    public String toggle(@RequestParam(name = "bookId") Long bookId, HttpSession session) {
         Member loginMember = (Member) session.getAttribute("loginMember");
         if (loginMember == null) {
             return "redirect:/login";
@@ -32,7 +32,6 @@ public class WishlistController {
         try {
             wishlistService.toggleWishlist(loginMember.getId(), bookId);
         } catch (IllegalStateException e) {
-            // 본인 도서 찜 시도 등 에러 처리
         }
 
         return "redirect:/books/" + bookId;

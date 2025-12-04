@@ -53,10 +53,10 @@ public class Member {
 
     private LocalDateTime createdAt;  // 가입일
 
+    private int reportCount = 0; // 신고 누적 횟수
 
     // === 생성 메서드 === //
-    public static Member createMember(String loginId, String password, String email,
-                                       String department, String studentId) {
+    public static Member createMember(String loginId, String password, String email, String department, String studentId) {
         Member member = new Member();
         member.loginId = loginId;
         member.password = password;
@@ -66,6 +66,7 @@ public class Member {
         member.loginFailCount = 0;
         member.status = MemberStatus.ACTIVE;
         member.createdAt = LocalDateTime.now();
+        member.reportCount = 0;
         return member;
     }
 
@@ -146,4 +147,12 @@ public class Member {
         }
         return true;
     }
+        public void addReportCount() {
+        this.reportCount++;
+        // 3회 이상 누적 시 자동 강퇴
+        if (this.reportCount >= 3) {
+            this.ban();
+        }
+    }
 }
+

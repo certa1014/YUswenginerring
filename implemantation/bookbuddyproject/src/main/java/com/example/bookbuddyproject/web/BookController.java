@@ -25,14 +25,14 @@ public class BookController {
 
     /**
      * 도서 목록 (검색)
-     * Use Case #2.2
      */
     @GetMapping
-    public String list(@RequestParam(required = false) String keyword,
-                       @RequestParam(required = false) String category,
-                       @RequestParam(required = false) Integer minPrice,
-                       @RequestParam(required = false) Integer maxPrice,
-                       @RequestParam(required = false) BookCondition bookCondition,
+    // 수정: name 속성 추가
+    public String list(@RequestParam(name = "keyword", required = false) String keyword,
+                       @RequestParam(name = "category", required = false) String category,
+                       @RequestParam(name = "minPrice", required = false) Integer minPrice,
+                       @RequestParam(name = "maxPrice", required = false) Integer maxPrice,
+                       @RequestParam(name = "bookCondition", required = false) BookCondition bookCondition,
                        Model model) {
 
         List<Book> books;
@@ -70,7 +70,6 @@ public class BookController {
 
     /**
      * 도서 등록 처리
-     * Use Case #2.1
      */
     @PostMapping("/new")
     public String create(@Valid BookForm form, BindingResult result,
@@ -102,10 +101,10 @@ public class BookController {
 
     /**
      * 도서 상세 조회
-     * Use Case #2.3
      */
     @GetMapping("/{bookId}")
-    public String detail(@PathVariable Long bookId, HttpSession session, Model model) {
+    // 수정 name="bookId" 추가
+    public String detail(@PathVariable(name = "bookId") Long bookId, HttpSession session, Model model) {
         Book book = bookService.viewBook(bookId);  // 조회수 증가
         model.addAttribute("book", book);
 
@@ -143,7 +142,8 @@ public class BookController {
      * 도서 수정 폼
      */
     @GetMapping("/{bookId}/edit")
-    public String editForm(@PathVariable Long bookId, HttpSession session, Model model) {
+    // 수정: name="bookId" 추가
+    public String editForm(@PathVariable(name = "bookId") Long bookId, HttpSession session, Model model) {
         Member loginMember = (Member) session.getAttribute("loginMember");
         if (loginMember == null) {
             return "redirect:/login";
@@ -175,7 +175,8 @@ public class BookController {
      * 도서 수정 처리
      */
     @PostMapping("/{bookId}/edit")
-    public String edit(@PathVariable Long bookId, @Valid BookForm form,
+    // 수정: name="bookId" 추가
+    public String edit(@PathVariable(name = "bookId") Long bookId, @Valid BookForm form,
                        BindingResult result, HttpSession session, Model model) {
         Member loginMember = (Member) session.getAttribute("loginMember");
         if (loginMember == null) {
@@ -213,7 +214,8 @@ public class BookController {
      * 도서 삭제
      */
     @PostMapping("/{bookId}/delete")
-    public String delete(@PathVariable Long bookId, HttpSession session) {
+    // 수정: name="bookId" 추가
+    public String delete(@PathVariable(name = "bookId") Long bookId, HttpSession session) {
         Member loginMember = (Member) session.getAttribute("loginMember");
         if (loginMember == null) {
             return "redirect:/login";

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>관리자 - 신고 관리</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #1a1a2e;
+        min-height: 100vh;
+        color: #fff;
+      }
+      .navbar {
+        background-color: #16213e !important;
+      }
+      .sidebar {
+        background-color: #16213e;
+        min-height: calc(100vh - 56px);
+        padding-top: 20px;
+      }
+      .sidebar .nav-link {
+        color: #adb5bd;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin: 5px 10px;
+      }
+      .sidebar .nav-link:hover {
+        background-color: #0f3460;
+        color: #fff;
+      }
+      .sidebar .nav-link.active {
+        background-color: #e94560;
+        color: #fff;
+        font-weight: bold;
+      }
+      .content-area {
+        padding: 30px;
+      }
+
+      .table {
+        color: #fff;
+        margin-top: 20px;
+      }
+      .table thead {
+        background-color: #0f3460;
+      }
+      .table tbody tr {
+        background-color: #1b1b3a;
+        border-bottom: 1px solid #2d2d4e;
+      }
+      .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+      }
+      .detail-text {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold" th:href="@{/admin}">BookBuddy Admin</a>
+        <div class="navbar-nav ms-auto">
+          <span class="nav-link text-light">master님</span>
+          <a class="nav-link" th:href="@{/admin/logout}">로그아웃</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <!-- 사이드바 -->
+        <div class="col-md-2 sidebar">
+          <nav class="nav flex-column">
+            <a class="nav-link" th:href="@{/admin/point-refund}">포인트 환급</a>
+            <a class="nav-link" th:href="@{/admin/point-charge}"
+              >포인트 충전 관리</a
+            >
+            <a class="nav-link" th:href="@{/admin/members}">회원목록 조회</a>
+            <a class="nav-link active" th:href="@{/admin/reports}">신고 처리</a>
+            <a class="nav-link" th:href="@{/admin/admins}">관리자 추가</a>
+          </nav>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <div class="col-md-10 content-area">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4>신고 관리</h4>
+            <div class="btn-group">
+              <a
+                th:href="@{/admin/reports}"
+                class="btn btn-outline-light"
+                th:classappend="${statusFilter == null} ? 'active'"
+                >전체</a
+              >
+              <a
+                th:href="@{/admin/reports(status='pending')}"
+                class="btn btn-outline-light"
+                th:classappend="${statusFilter == 'pending'} ? 'active'"
+                >대기중</a
+              >
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>유형</th>
+                  <th>대상 (피신고자)</th>
+                  <th>사유 (상세)</th>
+                  <th>관련글</th>
+                  <th>신고일</th>
+                  <th>상태</th>
+                  <th>처리</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:if="${#lists.isEmpty(reports)}">
+                  <td colspan="8" class="text-center text-muted py-5">
+                    신고 내역이 없습니다.
+                  </td>
+                </tr>
+                <tr th:each="report : ${reports}">
+                  <td th:text="${report.id}">1</td>
+                  <td>
+                    <span
+                      class="badge bg-warning text-dark"
+                      th:text="${report.reason.name()}"
+                      >SCAM</span
+                    >
+                  </td>
+                  <!-- 강퇴 버튼 추가 -->
+                  <td>
+                    <div>
+                      <span
+                        class="text-danger fw-bold"
+                        th:text="${report.reportedMember.loginId}"
+                        >target</span
+                      >
+                      <span
+                        class="small text-muted"
+                        th:text="'(누적: ' + ${report.reportedMember.reportCount} + ')'"
+                      ></span>
+                    </div>
+
+                    <div class="mt-1">
+                      <!-- 이미 강퇴된 경우 -->
+                      <span
+                        class="badge bg-secondary"
+                        th:if="${report.reportedMember.status != null and report.reportedMember.status.name() == 'BANNED'}"
+                      >
+                        강퇴됨
+                      </span>
+
+                      <!-- 강퇴되지 않은 경우: 즉시 강퇴 버튼 노출 -->
+                      <form
+                        th:if="${report.reportedMember.status == null or report.reportedMember.status.name() != 'BANNED'}"
+                        th:action="@{'/admin/members/' + ${report.reportedMember.id} + '/ban'}"
+                        method="post"
+                        class="d-inline"
+                        onsubmit="return confirm('⚠️ 경고: 해당 회원을 즉시 강제 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없습니다.');"
+                      >
+                        <button
+                          class="btn btn-sm btn-outline-danger py-0"
+                          style="font-size: 0.75rem"
+                        >
+                          즉시 강퇴
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div
+                      class="detail-text"
+                      th:title="${report.reasonDetail}"
+                      th:text="${report.reasonDetail != null && report.reasonDetail != '' ? report.reasonDetail : '-'}"
+                    >
+                      상세내용
+                    </div>
+                  </td>
+                  <td>
+                    <a
+                      th:href="@{/books/{id}(id=${report.book.id})}"
+                      target="_blank"
+                      class="btn btn-sm btn-outline-info"
+                    >
+                      보기
+                    </a>
+                  </td>
+                  <td
+                    th:text="${#temporals.format(report.createdAt, 'MM-dd HH:mm')}"
+                  >
+                    날짜
+                  </td>
+                  <td>
+                    <span
+                      class="badge bg-secondary"
+                      th:if="${report.status.name() == 'PENDING'}"
+                      >대기</span
+                    >
+                    <span
+                      class="badge bg-success"
+                      th:if="${report.status.name() == 'ACCEPTED'}"
+                      >승인됨</span
+                    >
+                    <span
+                      class="badge bg-danger"
+                      th:if="${report.status.name() == 'REJECTED'}"
+                      >거절됨</span
+                    >
+                  </td>
+                  <td>
+                    <div th:if="${report.status.name() == 'PENDING'}">
+                      <form
+                        th:action="@{'/admin/reports/' + ${report.id} + '/accept'}"
+                        method="post"
+                        class="d-inline"
+                        onsubmit="return confirm('신고를 승인하시겠습니까?\n대상 회원의 경고 횟수가 증가합니다.');"
+                      >
+                        <button class="btn btn-sm btn-primary">승인</button>
+                      </form>
+                      <form
+                        th:action="@{'/admin/reports/' + ${report.id} + '/reject'}"
+                        method="post"
+                        class="d-inline"
+                        onsubmit="return confirm('신고를 거절하시겠습니까?\n기록은 유지되지만 제재는 가해지지 않습니다.');"
+                      >
+                        <button class="btn btn-sm btn-secondary">거절</button>
+                      </form>
+                    </div>
+                    <span
+                      th:if="${report.status.name() != 'PENDING'}"
+                      class="text-muted small"
+                    >
+                      처리완료
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
