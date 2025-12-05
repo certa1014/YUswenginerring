@@ -27,7 +27,7 @@ public class EmailController {
         try {
             emailService.sendVerificationCode(email);
             response.put("success", true);
-            response.put("message", "인증코드가 발송되었습니다. (콘솔 확인)");
+            response.put("message", "인증코드가 발송되었습니다.");
         } catch (IllegalArgumentException e) {
             response.put("success", false);
             response.put("message", e.getMessage());
